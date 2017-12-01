@@ -1,30 +1,88 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-  var checkLTLButton = document.getElementById('check-LTL');
-  checkLTLButton.addEventListener('click', function() {
+    var data;
+    readTextFile("../productSpec/productSpecSheet.json", function(text){
+        // console.log(text);
+        var data = JSON.parse(text);
+        console.log(data);
+        sendDataToTab(data);
+    });
+
+    sendMessageToActiveTab();
+
+    var checkUPSButton = document.getElementById('check-UPS');
+    checkUPSButton.addEventListener('click', ()=>{
+
+        runScriptInActiveTab('js/getUPSPOs.js');
+    })
+
+    var checkLTLButton = document.getElementById('check-LTL');
+    checkLTLButton.addEventListener('click', ()=>{
+    
+
+        //sendMessageToActiveTab();
+
+        runScriptInActiveTab('js/getLTLPOs.js');
+        //runCodeInActiveTab();
+
+        // var data = JSON.parse(data);
+        // console.log(data["items"][0]);
 
 
-    //var content = $('h6').text()
-    //console.log(content);
+  }, false);
+}, false);
 
 
-// chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-//     var tab = tabs[0];
-//     console.log(tab.url, tab.title);
-//     chrome.tabs.getSelected(null, function(tab) {
-//         chrome.tabs.sendMessage(tab.id, {greeting: "hello"}, function(msg) {
-//             msg = msg || {};
-//             console.log('onResponse', msg.farewell);
-//         });
-//     });
-// });
+
+    function readTextFile(file, callback) {
+        var rawFile = new XMLHttpRequest();
+        rawFile.overrideMimeType("application/json");
+        rawFile.open("GET", file, true);
+        rawFile.onreadystatechange = function() {
+            if (rawFile.readyState === 4 && rawFile.status == "200") {
+                callback(rawFile.responseText);
+            }
+        }
+        rawFile.send(null);
+    }
+
+    //usage:
 
 
-    runScriptInActiveTab();
+    function sendDataToTab(data){
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
+            chrome.tabs.sendMessage(tabs[0].id, {data: data}, (response)=>{
+                console.log(response);
+            });
+        });
+    }    
 
-    function runScriptInActiveTab(){
+
+    function sendMessageToActiveTab(){
+
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
+            chrome.tabs.sendMessage(tabs[0].id, {greeting: "bitch, be humble"}, (response)=>{
+                console.log(response.farewell);
+            });
+        });
+
+    }
+
+
+    function runCodeInActiveTab(code) {
         chrome.tabs.executeScript({
-            file: 'js/content.js'
+            code: code
+        }, (result) =>{
+            console.log("code injected successfully.");
+        });
+    }
+
+    function runScriptInActiveTab(scriptFile){
+        chrome.tabs.executeScript({
+            file: scriptFile
+            //code: 'jQuery(document)'
+        }, (result) => {
+            console.log('Popup script');
         });
     }
 
@@ -47,62 +105,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-
-
-
-
-
-
-
-
-    // chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-    //   var tab = tabs[0];
-    //   console.log(tab.url, tab.title);
-    //   chrome.tabs.getSelected(null, function(tab) {
-    //     chrome.tabs.sendMessage(tab.id, {greeting: "hello"}, function(msg) {
-    //         msg = msg || {};
-    //         console.log('onResponse', msg.farewell);
-    //     });
-    //   });
-    // });
-
-
-
-
-
-
-    // var checkedList = [];
-    // var crList = [];
-    // var LTL = [];
-    // var UPS = [];
-    // var container = $('.modal-packing-slips .maincontent');
-
-    // $.each(container.find('.js-orders tbody tr'), function(){
-    //   var checkbox = $(this).find('input[type="checkbox"]')
-    //   var poNum = checkbox.data('full-po-num');
-    //   var cr = $('#' + poNum + '_crid').val();
-    //   var shippingMethod = $('.js-delivery-method-'+poNum).text()
-    //   if (shippingMethod === "LTL"){
-    //     LTL.push({"poNum": poNum});
-    //     //console.log(checkbox.prop('checked', false));
-    //   } else {
-    //     UPS.push({"poNum": poNum, "Air":$('.js-carrier-name-label-' + poNum).text().includes('Air')});
-    //     checkbox.prop('checked', true)
-    //     console.log("poNum:", poNum);
-    //   }
-    //   checkedList.push(poNum);
-    //   crList.push({
-    //     "poNum": poNum,
-    //     "carrier": cr,
-    //     "Express": $('.js-carrier-name-label-' + poNum).text().includes('Air')
-    //   });
-    // });
-
-    // console.log(crList);
-   
-
-
-
     //exportInputs();
     function exportInputs() {
         downloadFileFromText('asshole.csv',['dummy content!!\n', 'bitch\n', 'asshole\n'])
@@ -118,10 +120,3 @@ document.addEventListener('DOMContentLoaded', function() {
         a.click(); //this is probably the key - simulating a click on a download link
         delete a;// we don't need this anymore
     }
-
-
-
-
-
-  }, false);
-}, false);
