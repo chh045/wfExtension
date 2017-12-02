@@ -17,6 +17,18 @@
 
     <div class="container">
     	<h6>Wayfair</h6>
+    	<!-- <label class="btn btn-default btn-file">Browse <input type="file" style="display: none;"></label> -->
+    	<!-- <input type="file" hidden> -->
+    	<div class="input-group input-group-sm" style="width: 300px;">
+            <label class="input-group-btn">
+                <span class="btn btn-primary">
+                    Browse&hellip; <input type="file" id="fileinput" style="display: none;" multiple>
+                </span>
+            </label>
+            <input type="text" class="form-control" readonly>
+        </div>
+        <div id="editor"></div>
+    	<button id="upload-CRW" class="btn btn-info btn-xs">Upload CR</button>
     	<button id="check-UPS" class="btn btn-info btn-xs">Get UPSs</button>
     	<button id="check-LTL" class="btn btn-info btn-xs">Get LTLs</button>
     </div>
