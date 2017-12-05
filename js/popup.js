@@ -1,15 +1,20 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     var data;
+    var pos = [];
+    var LTL = [];
+    var UPS = [];
     readTextFile("../productSpec/productSpecSheet.json", function(text){
         // console.log(text);
         var data = JSON.parse(text);
         console.log(data);
-        sendDataToTab(data);
-        runScriptInActiveTab('js/getProductSpec.js');
+        // sendDataToTab(data);
+
+
+        // runScriptInActiveTab('js/getProductSpec.js');
     });
 
-    sendMessageToActiveTab();
+    //sendMessageToActiveTab();
 
 
     var uploadCRWButton = document.getElementById('upload-CRW');
@@ -18,18 +23,36 @@ document.addEventListener('DOMContentLoaded', function() {
         // var fileToLoad = $('#fileinput').files;
         var fileReader = new FileReader();
         fileReader.onload = (fileLoadedEvent)=>{
+            // console.log(fileLoadedEvent.target.result);
             var textFromFileLoaded = fileLoadedEvent.target.result;
-            console.log(textFromFileLoaded);
+
+            var lines = fileLoadedEvent.target.result.split('\n');
+            lines.forEach((line)=>{
+                pos.push(line.trim());
+            });
+            // sendDataToTab(pos);
+
+            // runScriptInActiveTab('js/.js');
+
+            $('#check-UPS').prop('disabled', false);
+            $('#check-LTL').prop('disabled', false);
+
         }
         fileReader.readAsText(myFile, "UTF-8");
-        // console.log(fileToLoad);
-        // console.log(myFile);
-
-        // handleFileSelect();
     });
 
     var checkUPSButton = document.getElementById('check-UPS');
     checkUPSButton.addEventListener('click', ()=>{
+
+
+        sendDataToTab(pos, (response)=>{
+            if(response.foundPOs !== undefined){
+                // console.log(response.foundPOs);
+                UPS = response.foundPOs;
+                $('#download-UPS').prop('disabled', false);
+            }
+        });
+
 
         runScriptInActiveTab('js/getUPSPOs.js');
     });
@@ -37,12 +60,26 @@ document.addEventListener('DOMContentLoaded', function() {
     var checkLTLButton = document.getElementById('check-LTL');
     checkLTLButton.addEventListener('click', ()=>{
     
+        sendDataToTab(pos, (response)=>{
+            if(response.foundPOs !== undefined){
+                // console.log(response.foundPOs);
+                LTL = response.foundPOs;
+                $('#download-LTL').prop('disabled', false);
+            }
+        });
         runScriptInActiveTab('js/getLTLPOs.js');
+
   });
 
-    var downloadPOButton = document.getElementById('download-PO');
-    downloadPOButton.addEventListener('click', ()=>{
-        exportInputs();
+    var downloadLTLButton = document.getElementById('download-LTL');
+    downloadLTLButton.addEventListener('click', ()=>{
+        exportFile(LTL);
+    });
+
+    var testButton = $("#test");
+    testButton.on('click', ()=>{
+        console.log("I clicked test!");
+        recieveMessageByActiveTab();
     });
 });
 
@@ -62,23 +99,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-    function sendDataToTab(data){
+    function sendDataToTab(data, callback){
         chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
-            chrome.tabs.sendMessage(tabs[0].id, {data: data}, (response)=>{
-                console.log(response);
-            });
+            chrome.tabs.sendMessage(tabs[0].id, {data: data}, callback
+            //     (response)=>{
+            //     console.log("son of bitch:", response);
+            // }
+            );
         });
+        // runScriptInActiveTab("js/getMessage.js");
     }    
 
 
     function sendMessageToActiveTab(){
+        // chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
+        //     chrome.tabs.sendMessage(tabs[0].id, {greeting: "bitch, be humble"}, (response)=>{
+        //         console.log(response);
+        //     });
+        // });
+        console.log("why??");
 
-        chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
-            chrome.tabs.sendMessage(tabs[0].id, {greeting: "bitch, be humble"}, (response)=>{
-                console.log(response);
-            });
+        var port = chrome.runtime.connect({name: "knockknock"});
+        port.postMessage({joke: "Knock knock"});
+
+        console.log("send from port: ", port);
+        console.log("chrome.runtime.Port: ", chrome.runtime.Port);
+
+        port.onMessage.addListener(function(msg) {
+            console.log("msg content: ", msg);
+            if (msg.question == "Who's there?")
+                port.postMessage({answer: "Madame"});
+            else if (msg.question == "Madame who?")
+                port.postMessage({answer: "Madame... Bovary"});
         });
 
+        console.log("send: ", chrome.runtime);
+    }
+
+    // this code is run in the tab, not in popup!
+    function recieveMessageByActiveTab(){
+        // var data;
+        // chrome.runtime.onMessage.addListener((request, sender, sendResponse)=> {
+        //     data = request.data
+        //     console.log(data);
+        // });
+        console.log("recieve:", chrome.runtime);
+        chrome.runtime.onConnect.addListener(function(port) {
+            console.log("recieve:", port);
+          console.assert(port.name == "knockknock");
+          // console.log("recieve:", port);
+          port.onMessage.addListener(function(msg) {
+            console.log(msg);
+            if (msg.joke == "Knock knock"){
+              port.postMessage({question: "Who's there?"});
+            }
+            else if (msg.answer == "Madame"){
+              port.postMessage({question: "Madame who?"});
+            }
+            else if (msg.answer == "Madame... Bovary"){
+              port.postMessage({question: "I don't get it."});
+            }
+        });
+});
     }
 
 
@@ -100,6 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+
     function modifyDOM() {
         //You can play with your DOM here or check URL against your regex
         console.log('Tab script:');
@@ -118,9 +201,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    //exportInputs();
-    function exportInputs() {
-        downloadFileFromText('asshole.csv',['test content!!\n', 'fuck\n', 'ass\n'])
+    //exportFile();
+    function exportFile(content) {
+        console.log(content);
+        
+        downloadFileFromText('download.xls',content.map(line => line+'\n'));
     }
 
     function downloadFileFromText(filename, content) {
@@ -166,6 +251,5 @@ $(function() {
           }
 
       });
-  });
-  
+    });
 });
