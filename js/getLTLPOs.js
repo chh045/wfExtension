@@ -14,6 +14,7 @@ function findPOs(getPos){
 	});
 }
 
+
 function getLTLPOs(pos){
     console.log("finding LTL POs..");
     var LTL = [];
