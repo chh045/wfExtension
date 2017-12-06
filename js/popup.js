@@ -84,9 +84,8 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("I clicked checkDimensionButton");
         console.log(dimension);
         sendDataToTab({
-            dimensions: dimension
-            // ,
-            // pos: pos
+            dimensions: dimension,
+            pos: pos
         }, (response)=>{
 
         });
