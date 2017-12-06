@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    var data;
+    var dimension;
     var pos = [];
     var LTL = [];
     var UPS = [];
     readTextFile("../productSpec/productSpecSheet.json", function(text){
         // console.log(text);
-        var data = JSON.parse(text);
-        console.log(data);
+        dimension = JSON.parse(text);
+        console.log(dimension);
         // sendDataToTab(data);
 
 
@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var uploadCRWButton = document.getElementById('upload-CRW');
     uploadCRWButton.addEventListener('click', ()=>{
         var myFile = $('#fileinput').prop('files')[0];
+
         // var fileToLoad = $('#fileinput').files;
         var fileReader = new FileReader();
         fileReader.onload = (fileLoadedEvent)=>{
@@ -39,13 +40,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
         }
         fileReader.readAsText(myFile, "UTF-8");
+        // fileReader.readAsText(myFile);
     });
 
     var checkUPSButton = document.getElementById('check-UPS');
     checkUPSButton.addEventListener('click', ()=>{
 
 
-        sendDataToTab(pos, (response)=>{
+        sendDataToTab({data:pos}, (response)=>{
             if(response.foundPOs !== undefined){
                 // console.log(response.foundPOs);
                 UPS = response.foundPOs;
@@ -60,7 +62,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var checkLTLButton = document.getElementById('check-LTL');
     checkLTLButton.addEventListener('click', ()=>{
     
-        sendDataToTab(pos, (response)=>{
+        sendDataToTab({data:pos}, (response)=>{
             if(response.foundPOs !== undefined){
                 // console.log(response.foundPOs);
                 LTL = response.foundPOs;
@@ -76,11 +78,28 @@ document.addEventListener('DOMContentLoaded', function() {
         exportFile(LTL);
     });
 
+
+    var checkDimensionButton = $('#check-dimension');
+    checkDimensionButton.on('click', ()=>{
+        console.log("I clicked checkDimensionButton");
+        console.log(dimension);
+        sendDataToTab({
+            dimensions: dimension
+            // ,
+            // pos: pos
+        }, (response)=>{
+
+        });
+        runScriptInActiveTab('js/checkDimension.js');
+    });
+
+
     var testButton = $("#test");
     testButton.on('click', ()=>{
         console.log("I clicked test!");
         recieveMessageByActiveTab();
     });
+
 });
 
 
@@ -101,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function sendDataToTab(data, callback){
         chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
-            chrome.tabs.sendMessage(tabs[0].id, {data: data}, callback
+            chrome.tabs.sendMessage(tabs[0].id, data, callback
             //     (response)=>{
             //     console.log("son of bitch:", response);
             // }
@@ -243,6 +262,7 @@ $(function() {
           var input = $(this).parents('.input-group').find(':text'),
               log = numFiles > 1 ? numFiles + ' files selected' : label;
 
+        // TODO:
 
           if( input.length ) {
               input.val(log);
