@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             $('#check-UPS').prop('disabled', false);
             $('#check-LTL').prop('disabled', false);
+            $('#check-dimension').prop('disabled', false);
 
         }
         fileReader.readAsText(myFile, "UTF-8");
@@ -84,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("I clicked checkDimensionButton");
         console.log(dimension);
         sendDataToTab({
-            dimensions: dimension,
+            dict: dimension,
             pos: pos
         }, (response)=>{
 
@@ -96,7 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var testButton = $("#test");
     testButton.on('click', ()=>{
         console.log("I clicked test!");
-        recieveMessageByActiveTab();
+        // recieveMessageByActiveTab();
+        runScriptInActiveTab('js/date.js');
     });
 
 });
@@ -186,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chrome.tabs.executeScript({
             code: code
         }, (result) =>{
-            console.log("code injected successfully.");
+            console.log("code injected successfully.", result);
         });
     }
 
@@ -195,7 +197,7 @@ document.addEventListener('DOMContentLoaded', function() {
             file: scriptFile
             //code: 'jQuery(document)'
         }, (result) => {
-            console.log('Popup script');
+            console.log('Popup script', result);
         });
     }
 
@@ -262,6 +264,7 @@ $(function() {
               log = numFiles > 1 ? numFiles + ' files selected' : label;
 
         // TODO:
+        $('#upload-CRW').prop('disabled', false);
 
           if( input.length ) {
               input.val(log);
