@@ -65,43 +65,9 @@ function getNextWeekday (date) {
 function findPOs(getPos){
 	chrome.runtime.onMessage.addListener((request, sender, response)=>{
 
-		// console.log(request);
-
 		var dict = request.dict;
 		var pos = request.pos;
 		
-		// console.log("dimensions:", dimensions);
-		// console.log("pos:", pos);
-
-		//response({foundPOs: pos});
-		// dict = {
-		// 		"items": 
-		// 		[
-		// 			{
-		// 				"ItemNum": "00114",
-		// 				"ShipMethod": "LTL",
-		// 				"RW": "38",
-		// 				"CtnNum": "1"
-		// 			},
-		// 			{
-		// 				"ItemNum": "00118",
-		// 				"ShipMethod": "LTL",
-		// 				"RW": "36",
-		// 				"CtnNum": "1"
-		// 			},
-		// 			{
-		// 				"ItemNum": "00450",
-		// 				"ShipMethod": "LTL",
-		// 				"RW": "56",
-		// 				"CtnNum": "1"
-		// 			},
-		// 			{
-		// 				"ItemNum": "30335F",
-		// 				"ShipMethod": "LTL",
-		// 				"RW": "25",
-		// 				"CtnNum": "1"
-		// 			}
-		// 		]};
 		getPos(pos, dict.items);
 	});
 }
@@ -131,10 +97,14 @@ function checkDimension(pos, items){
                         items.forEach((item)=>{
                         	if(item["ItemNum"] === itemID){
                         		
-                        		$('#' + poNum + '_' + identifier + '_weight').val(item.GW);
+                        		$('#' + poNum + '_' + identifier + '_weight').val(parseInt(item["GW"]));
+                        		// $('#' + poNum + '_' + identifier + '_totalweight').text(item["GW"]);
+                        		$('#' + poNum + '_' + identifier + '_boxcount').val(item["CtnNum"]);
+
                         		 // $('#calendar_' + poNum + '_pickup');
-                        		if($('#' + poNum + '_' + identifier + '_carton_class').val()==="")
-                        			$('#' + poNum + '_' + identifier + '_carton_class').val(125);
+                        		// console.log("ctn-class:",$('#' + poNum + '_' + identifier + '_carton_class').val().length, typeof($('#' + poNum + '_' + identifier + '_carton_class').val()))
+                        		if($('#' + poNum + '_' + identifier + '_carton_class').val().length === 0)
+                        			$('#' + poNum + '_' + identifier + '_carton_class').val("125");
                         		// console.log($('#' + poNum + '_' + identifier + '_weight').val(), 
                         		// 			$('#' + poNum + '_' + identifier + '_carton_class').val());
                         	}
@@ -142,6 +112,9 @@ function checkDimension(pos, items){
 
                     });
                 }
+
+                // update?
+                updateTotalWeight(poNum);
 		}	
 	});
 
@@ -174,6 +147,7 @@ function enable(poNum) {
                     if (this.length === 0) {
                         return true;
                     }
+                    $('#' + poNum + '_' + this + '_weight').prop('disabled', false);
                     $('#' + poNum + '_' + this + '_boxcount').prop('disabled', false);
                     $('[name="' + poNum + '_' + this + '_piecetype"]').prop('disabled', false);
                     $('#' + poNum + '_' + this + '_carton_nmfc').prop('disabled', false);
@@ -186,5 +160,98 @@ function enable(poNum) {
                 });
             }
 
+
+function cartonWeightFeatureOn(){
+	return document.getElementById('carton-weight-feature-on') !== null;
+}
+
+function updateTotalWeight(poNum) {
+    var unitWeight = 0
+      , cartonWeight = 0
+      , itemQty = 0
+      , boxCount = 0
+      , itemTotalWeight = 0
+      , totalWeight = 0;
+    var identifierList = $('#' + poNum + '_identifierlist').val().split(/\s*,\s*/);
+    $.each(identifierList, function() {
+        if (this.length === 0) {
+            return true;
+        }
+        itemQty = $('#' + poNum + '_' + this + '_item_qty');
+        if (itemQty.length) {
+            boxCount = Number($('#' + poNum + '_' + this + '_boxcount').val());
+            if (cartonWeightFeatureOn()) {
+                if (boxCount === 0) {
+                    boxCount = 1;
+                }
+                var expectedBoxCount = Number(document.getElementById(poNum + '_' + this + '_expected_box_count').value);
+                if (expectedBoxCount === boxCount) {
+                    boxCount = Number(document.getElementById(poNum + '_' + this + '_default_unique_boxes').value);
+                }
+                cartonWeight = 0;
+                for (var x = 0; x < boxCount; x++) {
+                    var weightMultiplier = Number(document.getElementById(poNum + '_' + this + '_weight_multiplier_' + (x + 1)).firstChild.nodeValue);
+                    cartonWeight += Number($('#' + poNum + '_' + this + '_weight_' + (x + 1)).val().replace(',', '.')) * weightMultiplier;
+                }
+                itemTotalWeight = cartonWeight;
+                $('#' + poNum + '_' + this + '_totalweight').html(Math.round(itemTotalWeight * 10) / 10);
+            } else {
+                unitWeight = Number($('#' + poNum + '_' + this + '_weight').val().replace(',', '.'));
+                itemTotalWeight = unitWeight * Number(itemQty.val());
+                // if ($.extranet.config.language === 'deu') {
+                //     itemTotalWeight = itemTotalWeight.toString().replace('\.', ',');
+                // }
+                $('#' + poNum + '_' + this + '_totalweight').html(itemTotalWeight);
+            }
+            // if ($.extranet.config.language === 'deu') {
+            //     totalWeight += Number(itemTotalWeight.replace(',', '.'));
+            // } else {
+                totalWeight += Number(itemTotalWeight);
+            // }
+        }
+    });
+    // if ($.extranet.config.language === 'deu') {
+    //     totalWeight = totalWeight.toString().replace('\.', ',');
+    //     $('#' + poNum + 'weight').val(totalWeight);
+    //     $('#' + poNum + '_totalweighttotal').html((Math.round(Number(totalWeight.replace(',', '.')) * 10) / 10).toString().replace('\.', ','));
+    // } else {
+        $('#' + poNum + 'weight').val(totalWeight);
+        $('#' + poNum + '_totalweighttotal').html(Math.round(totalWeight * 10) / 10);
+    // }
+    updateShippingInfo(poNum);
+}
+
+function updateShippingInfo(poNum) {
+    var deliveryMethod = parseInt($('#' + poNum + '_shipspeed').val(), 10)
+      , palletCount = $('#' + poNum + '_palletCount').val()
+      , palletWeight = 0
+      , boxCount = 0
+      , totalWeight = 0
+      , boxCountLabel = ''
+      , boxType = '';
+    // if (deliveryMethod !== $.extranet.constants.deliveryMethod.SMALL_PARCEL && deliveryMethod !== $.extranet.constants.deliveryMethod.MAIL) {
+        var identifierList = $('#' + poNum + '_identifierlist').val().split(/\s*,\s*/);
+        $.each(identifierList, function() {
+            if (this.length === 0) {
+                return true;
+            }
+            boxCount += Number($('#' + poNum + '_' + this + '_boxcount').val());
+            boxType = $('#' + poNum + '_' + this + '_piecetype').val();
+            if (boxCountLabel.indexOf(boxType) < 0) {
+                boxCountLabel += boxType + ', ';
+            }
+            totalWeight += Number($('#' + poNum + '_' + this + '_totalweight').html());
+        });
+        palletWeight = Number($('#' + poNum + '_palletWeight').val()) * Number($('#' + poNum + '_palletCount').val());
+        totalWeight += palletWeight;
+        if (palletCount > 1) {
+            boxCountLabel += palletCount + ' Pallets';
+        } else {
+            boxCountLabel += palletCount + ' Pallet';
+        }
+        $('#' + poNum + '_piece_count_total').html(boxCount + ' ' + boxCountLabel);
+        $('#' + poNum + '_total_weight_total').html(Math.round(totalWeight * 10) / 10);
+    // }
+}
 
 findPOs(checkDimension);

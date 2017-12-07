@@ -79,6 +79,11 @@ document.addEventListener('DOMContentLoaded', function() {
         exportFile(LTL);
     });
 
+    var downloadUPSButton = $('#download-UPS');
+    downloadUPSButton.on('click', ()=>{
+        exportFile(UPS);
+    });
+
 
     var checkDimensionButton = $('#check-dimension');
     checkDimensionButton.on('click', ()=>{
@@ -87,8 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
         sendDataToTab({
             dict: dimension,
             pos: pos
-        }, (response)=>{
-
         });
         runScriptInActiveTab('js/checkDimension.js');
     });
@@ -121,11 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function sendDataToTab(data, callback){
         chrome.tabs.query({active: true, currentWindow: true}, (tabs)=>{
-            chrome.tabs.sendMessage(tabs[0].id, data, callback
-            //     (response)=>{
-            //     console.log("son of bitch:", response);
-            // }
-            );
+            chrome.tabs.sendMessage(tabs[0].id, data, callback);
         });
         // runScriptInActiveTab("js/getMessage.js");
     }    

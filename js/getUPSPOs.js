@@ -17,6 +17,7 @@ function getUPSPOs(pos){
     console.log("finding UPS POs..");
     var UPSGround = [];
     var UPSAir = [];
+    var UPS = [];
     var container = $('.modal-packing-slips .maincontent');
 
     $.each(container.find('.js-orders tbody tr'), function(){
@@ -28,26 +29,18 @@ function getUPSPOs(pos){
 
         if (!(pos.includes(poNum)))
         	return;
-        console.log("poNum: ", poNum, "->", shippingMethod, "->", carrier);
-
 
         if (shippingMethod !== "LTL"){
-            
+            UPS.push(poNum);
+            checkbox.prop('checked', true);
             if(carrier.includes('Air'))
             	UPSAir.push(poNum);
             else
             	UPSGround.push(poNum);
 
-        } else {
-            UPS.push({"poNum": poNum, "Air":$('.js-carrier-name-label-' + poNum).text().includes('Air')});
-            // checkbox.prop('checked', true)
         }
-        // crList.push({
-        //     "poNum": poNum,
-        //     "carrier": cr,
-        //     "Express": $('.js-carrier-name-label-' + poNum).text().includes('Air')
-        // });
     });
+    return UPS;
 }
 
 
