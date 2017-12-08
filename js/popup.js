@@ -228,18 +228,45 @@ document.addEventListener('DOMContentLoaded', function() {
     function exportFile(filename, content) {
 
         // console.log(typeof(content));
-        var flatContent = ["oe_po_no\tord_no\tpage\n"], line;
+        var flatContent = ["oe_po_no\tord_no\tpage\t"], 
+            line, 
+            unsorted = {};
         content.forEach((po_so, p)=>{
             line = po_so[0] + '\t' + po_so[1] + '\t' + String(p+1);
+
             // console.log(line);
             if(po_so.length === 3){
                 line = line + '\t' + po_so[2];
             }
-            flatContent.push(line + '\n');
+            // console.log(line);
+            unsorted[po_so[1]] = [line+'\n', (p+1)];
+            // flatContent.push(line + '\n');
         });
-        
+        line = "";
+        var sorted = sortObject(unsorted);
+        for (e in sorted){
+            // console.log(e);
+            flatContent.push(sorted[e][0]);
+            line += sorted[e][1]+','
+        }
+
+        // sortObject(sorted).forEach((e)=>{
+        //     // console.log(e[0]);
+        //     flatContent.push(e[0]);
+        //     line += e[1]+','
+        // });
+        flatContent[0] += line.slice(0, -1) + '\n';
         // downloadFileFromText('download.xls',content.map(line => line+'\n'));
         downloadFileFromText(filename+'.xls', flatContent);
+    }
+
+    function sortObject(obj){
+        var sorted = {};
+        Object.keys(obj).sort().forEach((key)=>{
+            // console.log(key);
+            sorted[key] = obj[key];
+        });
+        return sorted;
     }
 
     function downloadFileFromText(filename, content) {
