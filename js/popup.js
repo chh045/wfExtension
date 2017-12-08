@@ -53,9 +53,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
         sendDataToTab({data:pos}, (response)=>{
-            if(response.foundPOs !== undefined){
+            if(response.result !== undefined){
                 // console.log(response.foundPOs);
-                UPS = response.foundPOs;
+                UPS = response.result;
                 $('#download-UPS').prop('disabled', false);
             }
         });
@@ -67,13 +67,16 @@ document.addEventListener('DOMContentLoaded', function() {
     var checkLTLButton = document.getElementById('check-LTL');
     checkLTLButton.addEventListener('click', ()=>{
     
-        sendDataToTab({data:pos}, (response)=>{
-            if(response.foundPOs !== undefined){
-                console.log(response.foundPOs);
-                LTL = response.foundPOs;
-                $('#download-LTL').prop('disabled', false);
-            }
-        });
+        sendDataToTab({
+                dict: dimension,
+                pos: pos
+            }, (response)=>{
+                if(response.result !== undefined){
+                    // console.log(response.foundPOs);
+                    LTL = response.result;
+                    $('#download-LTL').prop('disabled', false);
+                }
+            });
         runScriptInActiveTab('js/getLTLPOs.js');
 
   });
@@ -98,6 +101,11 @@ document.addEventListener('DOMContentLoaded', function() {
             pos: pos
         });
         runScriptInActiveTab('js/checkDimension.js');
+    });
+
+    $('#online2pdf').on('click', ()=>{
+        var url = "https://online2pdf.com/rearrange-pdf-pages-and-change-page-order";
+        chrome.tabs.create({url:url});
     });
 
 
@@ -232,12 +240,22 @@ document.addEventListener('DOMContentLoaded', function() {
             line, 
             unsorted = {};
         content.forEach((po_so, p)=>{
-            line = po_so[0] + '\t' + po_so[1] + '\t' + String(p+1);
+
+            line = "";
+            for(var i = 0; i < po_so.length; i++){
+                line += po_so[i] + '\t';
+                if(i==1)
+                    line += String(p+1) +'\t';
+            }
+
+
+
+            // line = po_so[0] + '\t' + po_so[1] + '\t' + String(p+1);
 
             // console.log(line);
-            if(po_so.length === 3){
-                line = line + '\t' + po_so[2];
-            }
+            // if(po_so.length === 3){
+            //     line = line + '\t' + po_so[2];
+            // }
             // console.log(line);
             unsorted[po_so[1]] = [line+'\n', (p+1)];
             // flatContent.push(line + '\n');

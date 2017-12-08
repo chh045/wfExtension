@@ -9,7 +9,7 @@ findPOs(getUPSPOs);
 function findPOs(getPos){
 	chrome.runtime.onMessage.addListener((request, sender, response)=>{
 		var pos = getPos(request.data);
-		response({foundPOs: pos});
+		response({result: pos});
 	});
 }
 

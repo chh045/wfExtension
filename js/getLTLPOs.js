@@ -10,15 +10,23 @@ findPOs(getLTLPOs);
 function findPOs(getPos){
 	chrome.runtime.onMessage.addListener((request, sender, response)=>{
 
-		var pos = getPos(request.data);
-		response({foundPOs: pos});
+
+		var dict = request.dict;
+		var pos = request.pos;
+		
+		var res = getPos(pos, dict.items);
+
+
+
+		// var pos = getPos(request.data);
+		response({result: res});
 	});
 }
 
 
-function getLTLPOs(pos){
+function getLTLPOs(pos, items){
     console.log("finding LTL POs..");
-    var LTL = [];
+    var LTL = [], special = {}, LTLItem;
     var container = $('.modal-packing-slips .maincontent');
 
     $.each(container.find('.js-orders tbody tr'), function(){
@@ -31,13 +39,31 @@ function getLTLPOs(pos){
         if(!(poNum in pos))
         	return;
         if(shippingMethod === "LTL"){
-        	LTL.push([poNum, pos[poNum]]);
-        	checkbox.prop('checked', true);
+        	// LTL.push([poNum, pos[poNum]]);
+        	// checkbox.prop('checked', true);
+
+        	LTLItem = [poNum, pos[poNum]];
+
+			var identifierList = $('#' + poNum + '_identifierlist').val().split(/\s*,\s*/);
+
+			if (identifierList.length) {
+                identifierList.forEach(function(identifier) {
+                    var itemID = $('#' + poNum + '_' + identifier + '_item_part_number').val();
+                    items.forEach((item)=>{
+                    	if(item["ItemNum"] === itemID && item["GW"]==="0")
+                    		// if(item["GW"]==="0")
+            				LTLItem.push(itemID);
+                    });
+
+                });
+
+            }
+            LTL.push(LTLItem);
         }
 
     });
     // console.log(crList);
-    // console.log("LTL: ", LTL);
+    console.log("LTL: ", LTL);
     return LTL;
 }
 

@@ -67,22 +67,6 @@ function findPOs(getPos){
 
 		var dict = request.dict;
 		var pos = request.pos;
-
-		dict = {
-			"items": 
-			[
-				{
-					"ItemNum": "19557EK",
-					"ShipMethod": "LTL",
-					"GW": "0",
-					"CtnNum": "3"
-				},
-				{
-					"ItemNum": "19573",
-					"ShipMethod": "LTL",
-					"GW": "0",
-					"CtnNum": "1"
-				}]}
 		
 		getPos(pos, dict.items);
 	});
@@ -114,18 +98,14 @@ function checkDimension(pos, items){
 
                         items.forEach((item)=>{
                         	if(item["ItemNum"] === itemID){
-                        		if(item["GW"]==="0"){
-                        			if(special[poNum])
-                        				special[poNum].push(itemID);
-                        			else
-                        				special[poNum] = [itemID]
-                        		}
-                        			// TODO:     create new button for download
-
-
-
-
-                        		else
+                        		// if(item["GW"]==="0"){
+                        		// 	if(special[poNum])
+                        		// 		special[poNum].push(itemID);
+                        		// 	else
+                        		// 		special[poNum] = [itemID]
+                        		// }
+                        		// else
+                        		if(item["GW"]!=="0")
 	                        		$('#' + poNum + '_' + identifier + '_weight').val(parseInt(item["GW"]));
                         		// $('#' + poNum + '_' + identifier + '_totalweight').text(item["GW"]);
                         		// itemQty * Number(item["CtnNum"])
@@ -147,11 +127,11 @@ function checkDimension(pos, items){
                 updateTotalWeight(poNum);
 		}	
 	});
-	if(!$.isEmptyObject(special))
-		console.log(special);
-	else
-		console.log("No item has weight '0'.");
-	return special;
+	// if(!$.isEmptyObject(special))
+	// 	console.log(special);
+	// else
+	// 	console.log("No item has weight '0'.");
+	// return special;
 }
 
 
