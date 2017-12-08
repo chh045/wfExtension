@@ -1,9 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     var dimension;
-    var pos = [];
-    var LTL = [];
-    var UPS = [];
+    var pos = {};
+    var LTL;
+    var UPS;
     readTextFile("../productSpec/productSpecSheet.json", function(text){
         // console.log(text);
         dimension = JSON.parse(text);
@@ -29,10 +29,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var lines = fileLoadedEvent.target.result.split('\n');
             lines.forEach((line)=>{
-                pos.push(line.trim());
+                // line.split(/ */);
+                var po_so = line.trim().split(/\s+/);
+                pos[po_so[0]] = po_so[1];
+                // console.log(line, line.split(/\s+/));
+                // pos.push(line.trim());
             });
             // sendDataToTab(pos);
-
+            console.log(pos);
             // runScriptInActiveTab('js/.js');
 
             $('#check-UPS').prop('disabled', false);
@@ -65,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
         sendDataToTab({data:pos}, (response)=>{
             if(response.foundPOs !== undefined){
-                // console.log(response.foundPOs);
+                console.log(response.foundPOs);
                 LTL = response.foundPOs;
                 $('#download-LTL').prop('disabled', false);
             }
@@ -76,12 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var downloadLTLButton = document.getElementById('download-LTL');
     downloadLTLButton.addEventListener('click', ()=>{
-        exportFile(LTL);
+        exportFile("download_LTL_PO", LTL);
     });
 
     var downloadUPSButton = $('#download-UPS');
     downloadUPSButton.on('click', ()=>{
-        exportFile(UPS);
+        exportFile("download_UPS_PO", UPS);
     });
 
 
@@ -221,10 +225,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     //exportFile();
-    function exportFile(content) {
-        console.log(content);
+    function exportFile(filename, content) {
+
+        // console.log(typeof(content));
+        var flatContent = ["oe_po_no\tord_no\tpage\n"], line;
+        content.forEach((po_so, p)=>{
+            line = po_so[0] + '\t' + po_so[1] + '\t' + String(p+1);
+            // console.log(line);
+            if(po_so.length === 3){
+                line = line + '\t' + po_so[2];
+            }
+            flatContent.push(line + '\n');
+        });
         
-        downloadFileFromText('download.xls',content.map(line => line+'\n'));
+        // downloadFileFromText('download.xls',content.map(line => line+'\n'));
+        downloadFileFromText(filename+'.xls', flatContent);
     }
 
     function downloadFileFromText(filename, content) {

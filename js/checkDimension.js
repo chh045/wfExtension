@@ -67,6 +67,22 @@ function findPOs(getPos){
 
 		var dict = request.dict;
 		var pos = request.pos;
+
+		dict = {
+			"items": 
+			[
+				{
+					"ItemNum": "19557EK",
+					"ShipMethod": "LTL",
+					"GW": "0",
+					"CtnNum": "3"
+				},
+				{
+					"ItemNum": "19573",
+					"ShipMethod": "LTL",
+					"GW": "0",
+					"CtnNum": "1"
+				}]}
 		
 		getPos(pos, dict.items);
 	});
@@ -76,6 +92,7 @@ function checkDimension(pos, items){
 	// TODO:
 	// iterate through POs, find the html element based on the single PO
 	var today = new Date();
+	var special = {};
 	var nextPickUpDate = getNextWeekday(today).dateToStringDMYFormat();
 	pos.forEach((poNum)=>{
 		var shippingMethod = $('.js-delivery-method-'+poNum).text();
@@ -91,15 +108,28 @@ function checkDimension(pos, items){
                     	// var this = this;
                         // purchaseOrder.orderProducts.push(_label.getOrderProduct(poNum, this));
                         // console.log($('#' + poNum + '_' + this + '_item_part_number'));
+                        var itemQty = Number($('#' + poNum + '_' + identifier + '_item_qty').val());
                         var itemID = $('#' + poNum + '_' + identifier + '_item_part_number').val();
                         console.log(itemID);
 
                         items.forEach((item)=>{
                         	if(item["ItemNum"] === itemID){
-                        		
-                        		$('#' + poNum + '_' + identifier + '_weight').val(parseInt(item["GW"]));
+                        		if(item["GW"]==="0"){
+                        			if(special[poNum])
+                        				special[poNum].push(itemID);
+                        			else
+                        				special[poNum] = [itemID]
+                        		}
+                        			// TODO:     create new button for download
+
+
+
+
+                        		else
+	                        		$('#' + poNum + '_' + identifier + '_weight').val(parseInt(item["GW"]));
                         		// $('#' + poNum + '_' + identifier + '_totalweight').text(item["GW"]);
-                        		$('#' + poNum + '_' + identifier + '_boxcount').val(item["CtnNum"]);
+                        		// itemQty * Number(item["CtnNum"])
+                        		$('#' + poNum + '_' + identifier + '_boxcount').val(itemQty*Number(item["CtnNum"]));
 
                         		 // $('#calendar_' + poNum + '_pickup');
                         		// console.log("ctn-class:",$('#' + poNum + '_' + identifier + '_carton_class').val().length, typeof($('#' + poNum + '_' + identifier + '_carton_class').val()))
@@ -117,7 +147,11 @@ function checkDimension(pos, items){
                 updateTotalWeight(poNum);
 		}	
 	});
-
+	if(!$.isEmptyObject(special))
+		console.log(special);
+	else
+		console.log("No item has weight '0'.");
+	return special;
 }
 
 

@@ -9,6 +9,7 @@ findPOs(getLTLPOs);
 
 function findPOs(getPos){
 	chrome.runtime.onMessage.addListener((request, sender, response)=>{
+
 		var pos = getPos(request.data);
 		response({foundPOs: pos});
 	});
@@ -21,21 +22,22 @@ function getLTLPOs(pos){
     var container = $('.modal-packing-slips .maincontent');
 
     $.each(container.find('.js-orders tbody tr'), function(){
-        var checkbox = $(this).find('input[type="checkbox"]')
+        var checkbox = $(this).find('input[type="checkbox"]');
         var poNum = checkbox.data('full-po-num');
         var cr = $('#' + poNum + '_crid').val();
         var shippingMethod = $('.js-delivery-method-'+poNum).text();
 
-        if(!(pos.includes(poNum)))
-        	return;
 
-        if (shippingMethod === "LTL"){
-            LTL.push(poNum);
-            checkbox.prop('checked', true);
+        if(!(poNum in pos))
+        	return;
+        if(shippingMethod === "LTL"){
+        	LTL.push([poNum, pos[poNum]]);
+        	checkbox.prop('checked', true);
         }
+
     });
     // console.log(crList);
-    console.log("LTL: ", LTL);
+    // console.log("LTL: ", LTL);
     return LTL;
 }
 

@@ -15,29 +15,28 @@ function findPOs(getPos){
 
 function getUPSPOs(pos){
     console.log("finding UPS POs..");
-    var UPSGround = [];
-    var UPSAir = [];
     var UPS = [];
     var container = $('.modal-packing-slips .maincontent');
 
     $.each(container.find('.js-orders tbody tr'), function(){
-        var checkbox = $(this).find('input[type="checkbox"]')
+        var checkbox = $(this).find('input[type="checkbox"]');
         var poNum = checkbox.data('full-po-num');
         var cr = $('#' + poNum + '_crid').val();
-        var shippingMethod = $('.js-delivery-method-'+poNum).text()
-        var carrier = $('.js-carrier-name-label-' + poNum).text();
+        var shippingMethod = $('.js-delivery-method-'+poNum).text();
+        var carrier = $('.js-carrier-name-label-' + poNum).html();
 
-        if (!(pos.includes(poNum)))
+        if (!(poNum in pos))
         	return;
-
         if (shippingMethod !== "LTL"){
-            UPS.push(poNum);
-            checkbox.prop('checked', true);
+            // UPS.push([poNum, pos[poNum]]);
+            // checkbox.prop('checked', true);
             if(carrier.includes('Air'))
-            	UPSAir.push(poNum);
+            	UPS.push([poNum, pos[poNum], carrier]);
+            	// UPSAir.push(poNum);
             else
-            	UPSGround.push(poNum);
-
+            	UPS.push([poNum, pos[poNum]]);
+            	// UPSGround.push(poNum);
+            checkbox.prop('checked', true);
         }
     });
     return UPS;
