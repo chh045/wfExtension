@@ -8,6 +8,7 @@ findPOs(getUPSPOs);
 
 function findPOs(getPos){
 	chrome.runtime.onMessage.addListener((request, sender, response)=>{
+		console.log(request.data);
 		var pos = getPos(request.data);
 		response({result: pos});
 	});
@@ -24,12 +25,17 @@ function getUPSPOs(pos){
         var cr = $('#' + poNum + '_crid').val();
         var shippingMethod = $('.js-delivery-method-'+poNum).text();
         var carrier = $('.js-carrier-name-label-' + poNum).html();
+        if (!cr || !shippingMethod ||!carrier){
+        	// alert("Please make sure the display number equals the total number.");
+        	return;
+        }
 
         if (!(poNum in pos))
         	return;
         if (shippingMethod !== "LTL"){
             // UPS.push([poNum, pos[poNum]]);
             // checkbox.prop('checked', true);
+            console.log("poNum:", poNum, "carrier:", carrier);
             if(carrier.includes('Air'))
             	UPS.push([poNum, pos[poNum], carrier]);
             	// UPSAir.push(poNum);

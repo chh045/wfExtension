@@ -59,6 +59,7 @@ function getLTLPOs(pos, items){
 
             }
             LTL.push(LTLItem);
+            checkbox.prop('checked', true);
         }
 
     });
