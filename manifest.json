@@ -4,33 +4,21 @@
 	"name": "Wayfair Extension",
 	"description": "This extension will help to simplifiy wayfair order processing.",
 	"version": "1.0",
-
 	"content_scripts": 
 	[
 		{
-			"matches": ["<all_urls>"],
-			"js":[
-				"lib/jquery-3.2.1.min.js",
-
-				"lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"
-			]
-		}, 
-		{
 			"matches" : ["*://*.partners.wayfair.com/*"],
 			"js":[
-				"js/background.js"
+				"lib/jquery-3.2.1.min.js"
 			]
 		}
 	],
-
-
 	"browser_action": 
 	{
 		"default_icon": "img/icon.png",
-		"default_popup": "popup.html"
+		"default_popup": "html/popup.html"
 	},
 	"permissions": [
-		// "activeTab", 
 		"tabs", 
 		"<all_urls>"
 	]
