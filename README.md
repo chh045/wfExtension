@@ -6,9 +6,6 @@ https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijam
 * One click check dimension for all LTL orders
 * Easy to rearrange the order of the purchasing list to match the sales list
 
-- Easy-to-filter packing slips for UPS orders and LTL orders
-- One click check dimension for all LTL orders
-- Easy to rearrange the order of the purchasing list to match the sales list
 
 ## Usage
 **Text file format**:
