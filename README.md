@@ -1,4 +1,5 @@
-# wfExtension - https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijamgcejonfnekec
+# wfExtension
+https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijamgcejonfnekec
 
 ## Features
 * Easy-to-filter packing slips for UPS orders and LTL orders
