@@ -12,10 +12,10 @@ https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijam
 - purchase order column on the left
 - sales order column on the right
 - ex. 
- po_no | ord_no
- --- | --- 
- CS123456 | 01224 
- CA654321 | 01225 
+ |  po_no | ord_no |
+ | :----: | :----: |
+ | CS123456 | 01224 | 
+ | CA654321 | 01225 |
 
 
 **Check UPS purchase orders**:
