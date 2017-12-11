@@ -33,8 +33,8 @@ https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijam
 - Same steps as UPS mentioned above.
 
 <img src='src/extension_checkUPS.gif' title='Check UPS' width='640' alt='Video Walkthrough' />
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
+<br>
 **Print UPS purchase list that matches the order from crystal report sale order list**
 - Download UPS order excel file, copy the page order at the first row to clipboard.
 - Download selected packing slips.
@@ -47,17 +47,6 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 **Check LTL Dimension**:
 - Upload text file at the order management page, to reduce the loading time, prefer filter delivery method of all orders before text file uploading.
 - Click the "Check Dimension" button to select and auto-correct all item's dimension.
-
-
-
-## Video Walkthrough 
-
-Here's a walkthrough of implemented user stories:
-
-<img src='walkThrough.gif' title='Video Walkthrough' width='' alt='Video Walkthrough' />
-
-GIF created with [LiceCap](http://www.cockos.com/licecap/).
-
 
 ## License
 
