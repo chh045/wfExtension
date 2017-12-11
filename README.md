@@ -11,7 +11,7 @@ https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijam
 **Text file format**:
 - purchase order column on the left
 - sales order column on the right
-- ex. 
+- Example: 
 
 |  po_no | ord_no |
 | :----: | :----: |
