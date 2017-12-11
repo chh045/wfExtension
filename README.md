@@ -34,7 +34,7 @@ https://chrome.google.com/webstore/detail/wayfair-extension/dcepkdfbjjokgechijam
 
 <img src='src/extension_checkUPS.gif' title='Check UPS' width='640' alt='Video Walkthrough' />
 
-<br>
+
 **Print UPS purchase list that matches the order from crystal report sale order list**
 - Download UPS order excel file, copy the page order at the first row to clipboard.
 - Download selected packing slips.
