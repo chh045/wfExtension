@@ -41,7 +41,9 @@ $(document).ready(()=>{
             flatContent.push(sorted[e][0]);
             line += sorted[e][1]+','
         }
-        flatContent[0] += line.slice(0, -1) + '\n';
+        // flatContent[0] += line.slice(0, -1) + '\n';
+        // line = pagination(line.slice(0, -1));
+        flatContent[0] += pagination(line.slice(0, -1)) + '\n';
         downloadFileFromText(filename+'.xls', flatContent);
     },
     sortObject = function(obj){
@@ -50,6 +52,30 @@ $(document).ready(()=>{
             sorted[key] = obj[key];
         });
         return sorted;
+    },
+    pagination = function(pageStr){
+        var page = pageStr.split(',');
+        var res = page[0];
+        var pre = Number(page[0]);
+        var preIndex = 0;
+        for(var i = 1; i < page.length; i++){
+            if(Number(page[i-1]) === Number(page[i])-1){
+                if(i === page.length -1){
+                    res += "-"+page[i]
+                }else{
+                    continue;
+                }
+            } else {
+                if(preIndex === i-1){
+                    res += ","+page[i];
+                } else {
+                    res += "-"+page[i];
+                }
+                preIndex = i;
+                pre = Number(page[i]);
+            }
+        }
+        return res;
     },
     readTextFile = function(filename, callback){
         var rawFile = new XMLHttpRequest();
@@ -158,9 +184,15 @@ $(document).ready(()=>{
         chrome.tabs.create({url:url});
     });
 
-    $("#test").on('click', function(){
-        console.log("I clicked test!");
-        // runScriptInActiveTab('../js/date.js');
+
+
+    $("#inject-button").on('click', function(){
+        console.log(dimension);
+        sendDataToTab({
+            dict: dimension,
+            pos: pos
+        });
+        runScriptInActiveTab('js/addButton.js');
     });
 });
 
