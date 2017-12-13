@@ -11,12 +11,15 @@ else{
     console.log("call success");
     $(function(){
         chrome.runtime.onMessage.addListener(function _data(request, sender, response){
+
+if(request.destination === 'getPOs'){     	
             if(request.dict){
                 response({result: getLTLPOs(request.pos, request.dict.items)});
             }
             else{
                 response({result: getUPSPOs(request.data)});
             }
+}            
             chrome.runtime.onMessage.removeListener(_data);
         });
         function getUPSPOs(pos){

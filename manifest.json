@@ -10,6 +10,11 @@
 			"matches" : ["*://*.partners.wayfair.com/*"],
 			"js":[
 				"lib/jquery-3.2.1.min.js"
+				// ,"lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"
+			],
+			"css": [
+				// "lib/bootstrap-3.3.7-dist/css/bootstrap.css",
+				"css/content.css"
 			]
 		}
 	],

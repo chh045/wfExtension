@@ -23,7 +23,7 @@ $(document).ready(()=>{
     },
     exportFile = function(filename, content){
         var flatContent = ["oe_po_no\tord_no\tpage\t"], 
-            line, 
+            line, seq,
             unsorted = {};
         content.forEach((po_so, p)=>{
             line = "";
@@ -43,7 +43,11 @@ $(document).ready(()=>{
         }
         // flatContent[0] += line.slice(0, -1) + '\n';
         // line = pagination(line.slice(0, -1));
-        flatContent[0] += pagination(line.slice(0, -1)) + '\n';
+        seq = pagination(line.slice(0, -1), 100);
+        for (var i = 0; i <seq.length; i++){
+            flatContent[i] =  flatContent[i].trim() + '\t\t\t'+seq[i]+'\n';
+        }
+        // flatContent[0] += pagination(line.slice(0, -1)) + '\n';
         downloadFileFromText(filename+'.xls', flatContent);
     },
     sortObject = function(obj){
@@ -53,29 +57,42 @@ $(document).ready(()=>{
         });
         return sorted;
     },
-    pagination = function(pageStr){
-        var page = pageStr.split(',');
-        var res = page[0];
-        var pre = Number(page[0]);
-        var preIndex = 0;
+    pagination = function(pageStr, limit){
+        var page = pageStr.split(','),
+            pre = 0,
+            res = page[pre],
+            seq = [];
         for(var i = 1; i < page.length; i++){
-            if(Number(page[i-1]) === Number(page[i])-1){
-                if(i === page.length -1){
-                    res += "-"+page[i]
-                }else{
-                    continue;
+
+            if(Number(page[i]) !== Number(page[i-1])+1){
+                if(i === pre+1){
+                    if((res+","+page[i]).length > limit){
+                        seq.push(res);
+                        res = page[i];
+                    } else {
+                        res += ","+page[i];
+                    }
+                } else {
+                    if((res+"-"+page[i-1]+","+page[i]).length > limit){
+                        seq.push(res);
+                        res = page[pre+1]+"-"+page[i-1]+","+page[i];
+                    } else{
+                        res += "-"+page[i-1]+","+page[i];
+                    }
                 }
-            } else {
-                if(preIndex === i-1){
-                    res += ","+page[i];
+                pre = i;
+            }
+            else if(i === page.length-1){
+                if((res+"-"+page[i]).length > limit){
+                    seq.push(res);
+                    res = page[pre+1] + "-" +page[i];
                 } else {
                     res += "-"+page[i];
                 }
-                preIndex = i;
-                pre = Number(page[i]);
             }
         }
-        return res;
+        seq.push(res);
+        return seq;
     },
     readTextFile = function(filename, callback){
         var rawFile = new XMLHttpRequest();
@@ -136,12 +153,29 @@ $(document).ready(()=>{
             $('#check-UPS').prop('disabled', false);
             $('#check-LTL').prop('disabled', false);
             $('#check-dimension').prop('disabled', false);
+
+
+            sendDataToTab({
+                dict: dimension,
+                pos: pos,
+                destination: "addButton"
+            }, (response)=>{
+                if(response.success === 1){
+                    //
+                    console.log("injection done");
+                }
+            });
+            runScriptInActiveTab('js/addButton.js');
+
         }
         fileReader.readAsText(myFile);
     });
 
     $('#check-UPS').on('click', function(){
-        sendDataToTab({data:pos}, (response)=>{
+        sendDataToTab({
+            data: pos,
+            destination: "getPOs"
+        }, (response)=>{
             if(response.result !== undefined){
                 UPS = response.result;
                 $('#download-UPS').prop('disabled', false);
@@ -153,7 +187,8 @@ $(document).ready(()=>{
     $('#check-LTL').on('click', function(){
         sendDataToTab({
                 dict: dimension,
-                pos: pos
+                pos: pos,
+                destination: "getPOs"
             }, (response)=>{
                 if(response.result !== undefined){
                     LTL = response.result;
@@ -174,7 +209,8 @@ $(document).ready(()=>{
     $('#check-dimension').on('click', function(){
         sendDataToTab({
             dict: dimension,
-            pos: pos
+            pos: pos,
+            destination: "checkDimension"
         });
         runScriptInActiveTab('js/checkDimension.js');
     });
@@ -190,7 +226,8 @@ $(document).ready(()=>{
         console.log(dimension);
         sendDataToTab({
             dict: dimension,
-            pos: pos
+            pos: pos,
+            destination: "test"
         });
         runScriptInActiveTab('js/addButton.js');
     });

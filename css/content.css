@@ -1,0 +1,32 @@
+.injected-button {
+  width: 80px;
+  display: inline-block;
+  padding: 4px 6px;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  outline: none;
+  color: #fff;
+  background-color: #4CAF50;
+  border: none;
+  border-radius: 5px;
+  box-shadow: 0 4px #999;
+}
+
+.injected-button:hover {background-color: #3e8e41}
+
+.injected-button:active {
+  background-color: #3e8e41;
+  box-shadow: 0 4px #666;
+  transform: translateY(2px);
+}
+
+.injected-info {
+  color: #00cc00;
+  padding-left: 80px;
+}
+
+#injected-div {
+  padding: auto 80px;
+}
