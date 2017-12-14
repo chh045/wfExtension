@@ -5,19 +5,15 @@
     <script type="text/javascript" src="../lib/jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="../lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="../js/popup.js"></script>
-
-    <!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-
-	<!-- Optional theme -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
-
+    <link rel="stylesheet" type="text/css" href="../css/popup.css">
   </head>
   <body>
 
-    <div class="container" style="">
+    <div class="container">
     	<h6>Wayfair</h6>
-    	<div class="input-group input-group-sm" style="width: 300px;">
+    	<div class="input-group input-group-sm">
             <label class="input-group-btn">
                 <span class="btn btn-primary">
                     Browse&hellip; <input type="file" id="fileinput" style="display: none;" multiple>
@@ -27,6 +23,7 @@
         </div>
         <br>
         <p>Version 1.0</p>
+        <p id="popup-info1" hidden></p>
     	<button id="upload-CRW" class="btn btn-info btn-xs" disabled="disabled">Upload CR</button>
     	<button id="check-UPS" class="btn btn-info btn-xs" disabled="disabled">Get UPSs</button>
     	<button id="check-LTL" class="btn btn-info btn-xs" disabled="disabled">Get LTLs</button>
@@ -36,7 +33,21 @@
 
         <hr>
         <p>Version 2.0</p>
+        <p id="popup-info2" hidden></p>
         <button id="inject-config" class="btn btn-info btn-xs" disabled="disabled">Plug-in Portal</button>
+        <div class="modal js-loading-bar">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <div class="progress progress-popup">
+                            <div class="progress-bar"></div>
+                        </div>
+                        Processing...
+                    </div>
+                </div>
+            </div>
+        </div>
+        <br><br>
     </div>
   </body>
 </html>

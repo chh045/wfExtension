@@ -1,24 +1,10 @@
 $(document).ready(()=>{
-    var dimension, 
+    var dimension, timeframe,
     LTL, UPS,
     pos = {},
     sendDataToTab = function(data, callback){
         chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
             chrome.tabs.sendMessage(tabs[0].id, data, callback);
-        });
-    },
-    runCodeInActiveTab = function(code){
-        chrome.tabs.executeScript({
-            code: code
-        }, (result) =>{
-            console.log("code injected successfully.", result);
-        });
-    },
-    runScriptInActiveTab = function(scriptFile){
-        chrome.tabs.executeScript({
-            file: scriptFile
-        }, (result) => {
-            console.log(result);
         });
     },
     exportFile = function(filename, content){
@@ -41,13 +27,10 @@ $(document).ready(()=>{
             flatContent.push(sorted[e][0]);
             line += sorted[e][1]+','
         }
-        // flatContent[0] += line.slice(0, -1) + '\n';
-        // line = pagination(line.slice(0, -1));
         seq = pagination(line.slice(0, -1), 100);
         for (var i = 0; i <seq.length; i++){
             flatContent[i] =  flatContent[i].trim() + '\t\t\t'+seq[i]+'\n';
         }
-        // flatContent[0] += pagination(line.slice(0, -1)) + '\n';
         downloadFileFromText(filename+'.xls', flatContent);
     },
     sortObject = function(obj){
@@ -113,11 +96,25 @@ $(document).ready(()=>{
         document.body.appendChild(a);
         a.click();
         delete a;
+    },
+    onload = function(){
+        var $modal = $('.js-loading-bar'),
+            $bar = $modal.find('.progress-bar');
+        $modal.modal('show');
+        timeframe = setInterval(function(){
+            $bar.toggleClass('animate');
+        }, 1500);
+    },
+    offload = function(){
+        var $modal = $('.js-loading-bar'),
+            $bar = $modal.find('.progress-bar');
+        clearInterval(timeframe);
+        $bar.removeClass('animate');
+        $modal.modal('hide');
     }
 
     readTextFile("../src/productSpecSheet.json", function(text){
         dimension = JSON.parse(text);
-        console.log(dimension)
     });
 
     $(document).on('change', ':file', function(){
@@ -154,48 +151,40 @@ $(document).ready(()=>{
             $('#check-UPS').prop('disabled', false);
             $('#check-LTL').prop('disabled', false);
             $('#check-dimension').prop('disabled', false);
-
-            chrome.runtime.sendMessage({
-                address: "background/config",
-                type: "/config", 
-                data: {
-                    dict: dimension,
-                    pos: pos
-                }
-            }, function(response){
-                if(response.success){
-                    console.log("call back success");
-                }
-            });
-
         }
         fileReader.readAsText(myFile);
     });
 
     $('#check-UPS').on('click', function(){
-
-        console.log("I clicked ups.");
-
+        onload();
         sendDataToTab({
-            address: "content/check-ups",
-            // type: "check-ups",
+            path: "content/check-ups",
             data: {
                 pos: pos
             }
         }, (response)=>{
             if(response.success){
                 UPS = response.data;
+                var ground=0, air=0;
+                UPS.forEach(function(ups){
+                    if(ups.length > 2){
+                        air += 1;
+                    } else {
+                        ground += 1;
+                    }
+                });
+                $('#popup-info1').text("Found "+ground+" ground UPS, "+air+" Express UPS");
+                $('#popup-info1').show();
                 $('#download-UPS').prop('disabled', false);
             }
+            offload();
         });
     });
 
     $('#check-LTL').on('click', function(){
-
-
+        onload();
         sendDataToTab({
-            address: "content/check-ltl",
-            // type: "check-ltl",
+            path: "content/check-ltl",
             data: {
                 pos: pos,
                 items: dimension.items
@@ -203,25 +192,30 @@ $(document).ready(()=>{
         }, (response)=>{
             if(response.success){
                 LTL = response.data;
+                $('#popup-info1').text("Found "+LTL.length+" LTL");
+                $('#popup-info1').show();
                 $('#download-LTL').prop('disabled', false);
             }
+            offload();
         });
     });
 
     $('#check-dimension').on('click', function(){
-
+        onload();
         sendDataToTab({
-            address: "content/check-dimension",
+            path: "content/check-dimension",
             data: {
                 pos: pos,
                 items: dimension.items
             }
         }, (response)=>{
             if(response.success){
-                console.log("all dimension checked.");
+                var _dimension = response.data;
+                $('#popup-info1').text(_dimension.length+" dimension checked");
+                $('#popup-info1').show();
             }
+            offload();
         });
-
     });
 
     $('#download-LTL').on('click', function(){
@@ -232,8 +226,7 @@ $(document).ready(()=>{
         exportFile("download_UPS_PO", UPS);
     });
 
-
-    //-------------------------- version 2 ------------------------------
+    /*-------------------------- version 2 ------------------------------*/
     $("#inject-config").on('click', function(){
         var myFile = $('#fileinput').prop('files')[0];
         var fileReader = new FileReader();
@@ -244,22 +237,25 @@ $(document).ready(()=>{
                 var po_so = line.trim().split(/\s+/);
                 pos[po_so[0]] = po_so[1];
             });
-            console.log("click inject-config.");
-
             sendDataToTab({
-                address: "content/config",
+                path: "content/config",
                 data: {
                     pos: pos,
                     items: dimension.items
                 }
             }, (response)=>{
                 if(response.success){
-                    console.log("Injection success.");
+                    $('#popup-info2').text("Plug-in buttons successfully");
+                    $('#popup-info2').show();
                 }
             });
-
         }
         fileReader.readAsText(myFile);
+    });
+
+    $('.js-loading-bar').modal({
+        backdrop: 'static',
+        show: false
     });
 });
 

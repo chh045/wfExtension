@@ -2,15 +2,8 @@
 	"manifest_version": 2,
 
 	"name": "Wayfair Extension",
-	"description": "This extension will help to simplifiy wayfair order processing.",
+	"description": "A helpful extension can simplifiy wayfair order processing significantly.",
 	"version": "2.0",
-	"background":
-	{
-		"scripts":[
-			"lib/jquery-3.2.1.min.js",
-			"js/background.js"
-		]
-	},
 	"content_scripts": 
 	[
 		{
@@ -18,18 +11,9 @@
 			"js":[
 				"lib/jquery-3.2.1.min.js",
 				"js/content.js"
-				// ,"lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"
 			],
 			"css": [
-				// "lib/bootstrap-3.3.7-dist/css/bootstrap.css",
 				"css/content.css"
-			]
-		},
-		{
-			"matches": ["*://*.developer.chrome.com/*"],
-			"js":[
-				"lib/jquery-3.2.1.min.js",
-				"js/content.js"
 			]
 		}
 	],

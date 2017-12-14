@@ -1,0 +1,16 @@
+.progress-bar.animate {
+	width: 100%;
+}
+
+.js-loading-bar {
+	margin: 70px auto;
+}
+
+.input-group-sm {
+	width: 300px;
+}
+
+#popup-info1, #popup-info2 {
+	color: #00cc00;
+	font-size: 0.8em;
+}

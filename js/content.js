@@ -46,48 +46,37 @@ $(function(){
       return prefixes[0 | (day) / 7];
     }
     
-
     $(document).ready(()=>{
-
-        //--------------------version 1------------------------
-        var totalUPS, totalLTL, count = 0;
-        //--------------------version 2------------------------
+        /*--------------------version 1------------------------*/
+        var totalUPS, totalLTL;
+        /*--------------------version 2------------------------*/
         var UPSTotal, LTLtotal, _config = false;
-        //-----------------------------------------------------
+        /*-----------------------------------------------------*/
 
         chrome.runtime.onMessage.addListener((request, sender, sendResponse)=>{
-
-            var package = request.address.split('/'),
-                address = package[0],
+            var package = request.path.split('/'),
+                path    = package[0],
                 type    = package[1], 
                 data    = request.data;
-            
-            console.log("address: ", address, " type: ", type);
-
-            if(address === "content"){
+            if(path === "content"){
                 if(type === "config"){
-
                     if(!_config){
                         injectUI(data.pos, data.items);
                         sendResponse({success: true});
                     }
                 }
                 else if(type === "check-ups"){
-                    count += 1;
                     totalUPS = getUPSPOs(data.pos);
                     sendResponse({success: true, data: totalUPS});
-                    console.log("clicked "+count+" times");
                 }
                 else if(type === "check-ltl"){
                     totalLTL = getLTLPOs(data.pos, data.items);
                     sendResponse({success: true, data: totalLTL});
                 }
                 else if(type === "check-dimension"){
-                    checkDimension(data.pos, data.items);
-                    sendResponse({success: true});
+                    var _dimension = checkDimension(data.pos, data.items);
+                    sendResponse({success: true, data: _dimension});
                 }
-                
-
             }
             return true; 
         });
@@ -102,30 +91,31 @@ $(function(){
             $('.injected-info').hide();
             $('#ups-download').hide();
             $('#ltl-download').hide();
-            $('#set-date').hide();
+            /* $('#set-date').hide();*/
 
             $('.js-search-button').on('click', function(){
                 $('.injected-info').hide();
                 $('#ups-download').hide();
                 $('#ltl-download').hide();
             });
-
             $('.js-modal-close').on('click', function(){
                 _config = false;
             });
-
             $('#search-all-btn').on('click', function(){
                 var total = $('.dataTables_info').text().split(' ')[5];
+                total = total.replace(/\,/g,'');
                 $('.modal-packing-slips .maincontent').find('select').append($('<option>', {value: Number(total),text: total}));
                 $('p.search-all').find('.injected-info').text('You can select '+total+' now');
                 $('p.search-all').find('.injected-info').show();
             });
-
             $('#set-date').on('click', function(){
-                $('input.date_picker.js-po-date-from.hasDatepicker').val('12/08/2017');
-                $('input.date_picker.js-po-date-to.hasDatepicker').val('12/11/2017');
+                var today = new Date();
+                var diff  = today.getDay()===1 ? 3 : 1;
+                var yesterday = new Date(today.setDate(today.getDate() - diff));
+                today = new Date();
+                $('input.date_picker.js-po-date-from.hasDatepicker').val(yesterday.dateToStringDMYFormat());
+                $('input.date_picker.js-po-date-to.hasDatepicker').val(today.dateToStringDMYFormat());
             });
-
             $('#ups-btn').on('click', function(){
                 UPSTotal = getUPSPOs(pos);
                 var ground=0, air=0;
@@ -136,13 +126,11 @@ $(function(){
                         ground += 1;
                     }
                 });
-
                 $('p.check-ups').find('.injected-info').text("Found "+ground+" ground UPS, "+air+" Express UPS");
                 $('p.check-ups').find('.injected-info').show();
                 if(UPSTotal.length !== 0){
                     $('#ups-download').show();
                 }
-
             });
             $('#ltl-btn').on('click', function(){
                 LTLtotal = getLTLPOs(pos, items);
@@ -242,7 +230,6 @@ $(function(){
             delete a;
         }
         function getUPSPOs(pos){
-            console.log("Finding UPS POs..");
             var UPS = [],
                 container = $('.modal-packing-slips .maincontent');
             $.each(container.find('.js-orders tbody tr'), function(){
@@ -268,16 +255,11 @@ $(function(){
                     checkbox.prop('checked', true);
                 }
             });
-            console.log("UPS:", UPS);
             return UPS;
         }
-
-
         function getLTLPOs(pos, items){
-            console.log("Finding LTL POs..");
             var LTL = [], LTLItem,
                 container = $('.modal-packing-slips .maincontent');
-
             $.each(container.find('.js-orders tbody tr'), function(){
                 var checkbox = $(this).find('input[type="checkbox"]');
                 var poNum = checkbox.data('full-po-num');
@@ -306,16 +288,12 @@ $(function(){
                     checkbox.prop('checked', true);
                 }
             });
-            console.log("LTL: ", LTL);
             return LTL;
         }
-
-
         function checkDimension(pos, items){
             var today = new Date();
-            var special = {};
+            var dimension = [];
             var nextPickUpDate = today.getHours()>=12 ? getNextWeekday(getNextWeekday(today)) : getNextWeekday(today);
-            // var nextPickUpDate = getNextWeekday(today).dateToStringDMYFormat();
             for (poNum in pos){
                 var shippingMethod = $('.js-delivery-method-'+poNum).text();
                 if(shippingMethod === 'LTL'){
@@ -340,8 +318,10 @@ $(function(){
                         });
                     }
                     updateTotalWeight(poNum);
-                }   
+                    dimension.push(poNum);
+                }
             }
+            return dimension;
         }
         function getNextWeekday(date) {
             var tomorrow = new Date(date.setDate(date.getDate() + 1));
