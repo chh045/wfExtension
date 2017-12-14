@@ -4,7 +4,7 @@
     <title>Wayfair Extension</title>
     <script type="text/javascript" src="../lib/jquery-3.2.1.min.js"></script>
     <script type="text/javascript" src="../lib/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../js/content.js"></script>
+    <script type="text/javascript" src="../js/popup.js"></script>
 
     <!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
@@ -15,7 +15,7 @@
   </head>
   <body>
 
-    <div class="container">
+    <div class="container" style="">
     	<h6>Wayfair</h6>
     	<div class="input-group input-group-sm" style="width: 300px;">
             <label class="input-group-btn">
@@ -26,14 +26,17 @@
             <input type="text" class="form-control" readonly>
         </div>
         <br>
+        <p>Version 1.0</p>
     	<button id="upload-CRW" class="btn btn-info btn-xs" disabled="disabled">Upload CR</button>
     	<button id="check-UPS" class="btn btn-info btn-xs" disabled="disabled">Get UPSs</button>
     	<button id="check-LTL" class="btn btn-info btn-xs" disabled="disabled">Get LTLs</button>
     	<button id="download-LTL" class="btn btn-info btn-xs" disabled="disabled">Download LTL</button>
         <button id="download-UPS" class="btn btn-info btn-xs" disabled="disabled">Download UPS</button>
         <button id="check-dimension" class="btn btn-info btn-xs" disabled="disabled">Check Dimension</button>
-        <button id="online2pdf" class="btn btn-info btn-xs">Transform PDF</button>
-    	<button id="inject-button" class="btn btn-info btn-xs">Inject</button>
+
+        <hr>
+        <p>Version 2.0</p>
+        <button id="inject-config" class="btn btn-info btn-xs" disabled="disabled">Plug-in Portal</button>
     </div>
   </body>
 </html>

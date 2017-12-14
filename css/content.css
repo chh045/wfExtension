@@ -1,5 +1,5 @@
 .injected-button {
-  width: 80px;
+  width: 100px;
   display: inline-block;
   padding: 4px 6px;
   font-size: 12px;
@@ -24,9 +24,15 @@
 
 .injected-info {
   color: #00cc00;
-  padding-left: 80px;
+  padding: 0px 20px;
+  /*margin: 0 2%;*/
 }
 
 #injected-div {
-  padding: auto 80px;
+  padding: 5px 20px;
+}
+
+.download-btn {
+  margin-right: 30%; 
+  float: right;
 }
