@@ -111,6 +111,16 @@ $(document).ready(()=>{
         clearInterval(timeframe);
         $bar.removeClass('animate');
         $modal.modal('hide');
+    },
+    showRed = function(selector, text){
+        $(selector).css("color", "#e60000");
+        $(selector).text(text);
+        $(selector).show();
+    },
+    showGreen = function(selector, text){
+        $(selector).css("color", "#00cc00");
+        $(selector).text(text);
+        $(selector).show();
     }
 
     readTextFile("../src/productSpecSheet.json", function(text){
@@ -163,7 +173,11 @@ $(document).ready(()=>{
                 pos: pos
             }
         }, (response)=>{
-            if(response.success){
+            offload();
+            if(!response){
+                showRed('#popup-info1', 'No UPS found');
+            }
+            else if(response.success){
                 UPS = response.data;
                 var ground=0, air=0;
                 UPS.forEach(function(ups){
@@ -173,11 +187,9 @@ $(document).ready(()=>{
                         ground += 1;
                     }
                 });
-                $('#popup-info1').text("Found "+ground+" ground UPS, "+air+" Express UPS");
-                $('#popup-info1').show();
+                showGreen('#popup-info1', "Found "+ground+" ground UPS, "+air+" Express UPS");
                 $('#download-UPS').prop('disabled', false);
             }
-            offload();
         });
     });
 
@@ -190,13 +202,15 @@ $(document).ready(()=>{
                 items: dimension.items
             }
         }, (response)=>{
-            if(response.success){
+            offload();
+            if(!response){
+                showRed('#popup-info1', 'No LTL found');
+            }
+            else if(response.success){
                 LTL = response.data;
-                $('#popup-info1').text("Found "+LTL.length+" LTL");
-                $('#popup-info1').show();
+                showGreen('#popup-info1', "Found "+LTL.length+" LTL");
                 $('#download-LTL').prop('disabled', false);
             }
-            offload();
         });
     });
 
@@ -209,12 +223,20 @@ $(document).ready(()=>{
                 items: dimension.items
             }
         }, (response)=>{
-            if(response.success){
-                var _dimension = response.data;
-                $('#popup-info1').text(_dimension.length+" dimension checked");
-                $('#popup-info1').show();
-            }
             offload();
+            if(!response){
+                showRed('#popup-info1', 'No dimension found');
+            }
+            else if(response.success){
+                var data = response.data;
+                var text = "";
+                data.pagination.forEach((page, p)=>{
+                    text += "print_"+(p+1)+" ["+page+"]\n";
+                });
+                $('.form-control').text(text);
+                $('.form-control').show();
+                showGreen('#popup-info1', data.count+" dimension checked");
+            }
         });
     });
 

@@ -47,6 +47,7 @@ $(function(){
     }
     
     $(document).ready(()=>{
+        console.log("wayfair extension activated");
         /*--------------------version 1------------------------*/
         var totalUPS, totalLTL;
         /*--------------------version 2------------------------*/
@@ -110,11 +111,9 @@ $(function(){
             });
             $('#set-date').on('click', function(){
                 var today = new Date();
-                var diff  = today.getDay()===1 ? 3 : 1;
-                var yesterday = new Date(today.setDate(today.getDate() - diff));
-                today = new Date();
-                $('input.date_picker.js-po-date-from.hasDatepicker').val(yesterday.dateToStringDMYFormat());
                 $('input.date_picker.js-po-date-to.hasDatepicker').val(today.dateToStringDMYFormat());
+                var yesterday = getPreWeekday(today);
+                $('input.date_picker.js-po-date-from.hasDatepicker').val(yesterday.dateToStringDMYFormat());
             });
             $('#ups-btn').on('click', function(){
                 UPSTotal = getUPSPOs(pos);
@@ -170,7 +169,7 @@ $(function(){
                 line += sorted[e][1]+','
             }
 
-            seq = pagination(line.slice(0, -1), 100);
+            seq = pagination(line.slice(0, -1), 100, 70);
             for (var i = 0; i <seq.length; i++){
                 flatContent[i] =  flatContent[i].trim() + '\t\t\t'+seq[i]+'\n';
             }
@@ -183,34 +182,42 @@ $(function(){
             });
             return sorted;
         }
-        function pagination(pageStr, limit){
+        function pagination(pageStr, limit, _max){
             var page = pageStr.split(','),
                 pre = 0,
+                pageCount = 0,
                 res = page[pre],
                 seq = [];
             for(var i = 1; i < page.length; i++){
+                pageCount += 1;
                 if(Number(page[i]) !== Number(page[i-1])+1){
                     if(i === pre+1){
-                        if((res+","+page[i]).length > limit){
+                        if((res+","+page[i]).length > limit || pageCount > _max){
                             seq.push(res);
                             res = page[i];
-                        } else {
+                            pageCount = 0;
+                        }
+                        else {
                             res += ","+page[i];
                         }
+
                     } else {
-                        if((res+"-"+page[i-1]+","+page[i]).length > limit){
+                        if((res+","+page[i]).length > limit || pageCount > _max){
                             seq.push(res);
                             res = page[pre+1]+"-"+page[i-1]+","+page[i];
-                        } else{
+                            pageCount = 0;
+                        }
+                        else{
                             res += "-"+page[i-1]+","+page[i];
                         }
                     }
                     pre = i;
                 }
                 else if(i === page.length-1){
-                    if((res+"-"+page[i]).length > limit){
+                    if((res+","+page[i]).length > limit || pageCount > _max){
                         seq.push(res);
                         res = page[pre+1] + "-" +page[i];
+                        pageCount = 0;
                     } else {
                         res += "-"+page[i];
                     }
@@ -291,9 +298,9 @@ $(function(){
             return LTL;
         }
         function checkDimension(pos, items){
-            var today = new Date();
-            var dimension = [];
-            var nextPickUpDate = today.getHours()>=12 ? getNextWeekday(getNextWeekday(today)) : getNextWeekday(today);
+            var today = new Date(),
+                dimension = {}, page = 0, sorted, line = "",
+                nextPickUpDate = today.getHours()>=12 ? getNextWeekday(getNextWeekday(today)) : getNextWeekday(today);
             for (poNum in pos){
                 var shippingMethod = $('.js-delivery-method-'+poNum).text();
                 if(shippingMethod === 'LTL'){
@@ -318,19 +325,26 @@ $(function(){
                         });
                     }
                     updateTotalWeight(poNum);
-                    dimension.push(poNum);
+                    // dimension.push(poNum);
+                    page+=1;
+                    dimension[pos[poNum]] = page;
                 }
             }
-            return dimension;
+            sorted = sortObject(dimension);
+            for (e in sorted){
+                line += sorted[e]+','
+            }
+            console.log(sorted);
+            return {pagination: pagination(line.slice(0, -1), 100, 70), count: page};
+        }
+        function getPreWeekday(date) {
+            var yesterday = new Date(date.setDate(date.getDate() - 1));
+            return (yesterday.getDay() % 6 && yesterday.getHoliday() === undefined) ? yesterday : getPreWeekday(yesterday);
         }
         function getNextWeekday(date) {
             var tomorrow = new Date(date.setDate(date.getDate() + 1));
             return (tomorrow.getDay() % 6 && tomorrow.getHoliday() === undefined) ? tomorrow : getNextWeekday(tomorrow);
-        }
-        function getSecondNextWeekday(date) {
-            var tomorrow = new Date(date.setDate(date.getDate() + 2));
-            return (tomorrow.getDay() % 6 && tomorrow.getHoliday() === undefined) ? tomorrow : getNextWeekday(tomorrow);
-        }    
+        }  
         function select(poNum) {
             $('#' + poNum + '_row').removeClass('hidden-node');
             $('#' + poNum + '_iteminfo').removeClass('hidden-node');
