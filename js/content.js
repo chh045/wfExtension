@@ -140,11 +140,11 @@ $(function(){
                 }
             });
             $('#ltl-download').on('click', function(){
-                exportFile("download_LTL_PO", LTLtotal);
+                exportFile("download_ltl_po", LTLtotal);
             });
 
             $('#ups-download').on('click', function(){
-                exportFile("download_UPS_PO", UPSTotal);
+                exportFile("download_ups_po", UPSTotal);
             });
             _config = true;
         }
@@ -202,7 +202,7 @@ $(function(){
                         }
 
                     } else {
-                        if((res+","+page[i]).length > limit || pageCount > _max){
+                        if((res+"-"+page[i-1]+","+page[i]).length > limit || pageCount > _max){
                             seq.push(res);
                             res = page[pre+1]+"-"+page[i-1]+","+page[i];
                             pageCount = 0;
@@ -214,7 +214,7 @@ $(function(){
                     pre = i;
                 }
                 else if(i === page.length-1){
-                    if((res+","+page[i]).length > limit || pageCount > _max){
+                    if((res+"-"+page[i]).length > limit || pageCount > _max){
                         seq.push(res);
                         res = page[pre+1] + "-" +page[i];
                         pageCount = 0;

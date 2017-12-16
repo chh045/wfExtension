@@ -6,19 +6,38 @@
 	margin: 70px auto;
 }
 
-.input-group-sm {
-	width: 300px;
+.version-2-btn-group, .version-1-btn-group {
+	padding-left: 6%;
 }
 
 #popup-info1, #popup-info2 {
 	font-size: 0.8em;
 }
 
-.form-control {
+#form-control, #file-modal-submit, #file-modal-check, .version-1-btn-group {
 	display: none;
 }
 
 .btn-info {
 	margin: 2px;
 	width: 45%;
+}
+
+.container {
+	min-width: 350px;
+}
+
+#copyright {
+	text-align: right;
+	font-size: 75%;
+}
+
+#plug-in-header {
+	margin: 0 auto;
+	padding: 50px 10px 30px 10px;
+}
+
+#form-control {
+	margin-top: 10px;
+	width: 94%;
 }

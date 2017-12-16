@@ -137,8 +137,8 @@ $(document).ready(()=>{
     $(':file').on('fileselect', function(event, numFiles, label) {
         var input = $(this).parents('.input-group').find(':text'),
             log = numFiles > 1 ? numFiles + ' files selected' : label;
-        $('#upload-CRW').prop('disabled', false);
-        $('#inject-config').prop('disabled', false);
+        $('#file-modal-submit').prop('disabled', false);
+        $('#file-modal-dimension').prop('disabled', false);
 
         if(input.length){
             input.val(log); 
@@ -146,23 +146,6 @@ $(document).ready(()=>{
         else if(log){
             alert(log);
         }
-    });
-
-    $('#upload-CRW').on('click', function(){
-        var myFile = $('#fileinput').prop('files')[0];
-        var fileReader = new FileReader();
-        fileReader.onload = (fileLoadedEvent)=>{
-            var textFromFileLoaded = fileLoadedEvent.target.result;
-            var lines = fileLoadedEvent.target.result.split('\n');
-            lines.forEach((line)=>{
-                var po_so = line.trim().split(/\s+/);
-                pos[po_so[0]] = po_so[1];
-            });
-            $('#check-UPS').prop('disabled', false);
-            $('#check-LTL').prop('disabled', false);
-            $('#check-dimension').prop('disabled', false);
-        }
-        fileReader.readAsText(myFile);
     });
 
     $('#check-UPS').on('click', function(){
@@ -214,42 +197,42 @@ $(document).ready(()=>{
         });
     });
 
-    $('#check-dimension').on('click', function(){
-        onload();
+    $('#download-LTL').on('click', function(){
+        exportFile("download_ltl_po", LTL);
+    });
+
+    $('#download-UPS').on('click', function(){
+        exportFile("download_ups_po", UPS);
+    });
+
+    /*-------------------------- version 2 ------------------------------*/
+
+    $("#inject-config").on('click', function(){
         sendDataToTab({
-            path: "content/check-dimension",
+            path: "content/config",
             data: {
                 pos: pos,
                 items: dimension.items
             }
         }, (response)=>{
-            offload();
             if(!response){
-                showRed('#popup-info1', 'No dimension found');
+                showRed('#popup-info1', 'Plug-in failed');
             }
             else if(response.success){
-                var data = response.data;
-                var text = "";
-                data.pagination.forEach((page, p)=>{
-                    text += "print_"+(p+1)+" ["+page+"]\n";
-                });
-                $('.form-control').text(text);
-                $('.form-control').show();
-                showGreen('#popup-info1', data.count+" dimension checked");
+            	showGreen('#popup-info1', "Plug-in buttons success");
             }
         });
+    });    
+
+    $('.js-loading-bar').modal({
+        backdrop: 'static',
+        show: false
     });
 
-    $('#download-LTL').on('click', function(){
-        exportFile("download_LTL_PO", LTL);
-    });
 
-    $('#download-UPS').on('click', function(){
-        exportFile("download_UPS_PO", UPS);
-    });
+    /*-------------------------- version 3 ------------------------------*/
 
-    /*-------------------------- version 2 ------------------------------*/
-    $("#inject-config").on('click', function(){
+    $('#file-modal-submit').on('click', function(){
         var myFile = $('#fileinput').prop('files')[0];
         var fileReader = new FileReader();
         fileReader.onload = (fileLoadedEvent)=>{
@@ -259,25 +242,71 @@ $(document).ready(()=>{
                 var po_so = line.trim().split(/\s+/);
                 pos[po_so[0]] = po_so[1];
             });
-            sendDataToTab({
-                path: "content/config",
-                data: {
-                    pos: pos,
-                    items: dimension.items
-                }
-            }, (response)=>{
-                if(response.success){
-                    $('#popup-info2').text("Plug-in buttons successfully");
-                    $('#popup-info2').show();
-                }
-            });
+            $('#check-UPS').prop('disabled', false);
+            $('#check-LTL').prop('disabled', false);
+            $("#inject-config").prop('disabled', false);
+            showGreen('#popup-info1', 'upload success, plug-in enabled');
         }
         fileReader.readAsText(myFile);
     });
 
-    $('.js-loading-bar').modal({
-        backdrop: 'static',
-        show: false
+    $('#file-modal-dimension').on('click', function(){
+        var myFile = $('#fileinput').prop('files')[0];
+        var fileReader = new FileReader();
+        fileReader.onload = (fileLoadedEvent)=>{
+            var textFromFileLoaded = fileLoadedEvent.target.result;
+            var lines = fileLoadedEvent.target.result.split('\n');
+            lines.forEach((line)=>{
+                var po_so = line.trim().split(/\s+/);
+                pos[po_so[0]] = po_so[1];
+            });
+            onload();
+	        sendDataToTab({
+	            path: "content/check-dimension",
+	            data: {
+	                pos: pos,
+	                items: dimension.items
+	            }
+	        }, (response)=>{
+	            offload();
+	            if(!response){
+	                showRed('#popup-info1', 'No dimension found');
+	            }
+	            else if(response.success){
+	                var data = response.data;
+	                var text = "";
+	                data.pagination.forEach((page, p)=>{
+	                    text += "_print_"+(p+1)+" ["+page+"]\n";
+	                });
+	                $('#form-control').text(text);
+	                $('#form-control').show();
+	                showGreen('#popup-info1', data.count+" dimension checked");
+	            }
+	        });
+        }
+        fileReader.readAsText(myFile);
+    });
+
+    $('#file-modal').on('show.bs.modal', function(event){
+    	$('.modal-btn').hide();
+    	console.log(event);
+    	console.log("show");
+    	var button = $(event.relatedTarget);
+    	var modal = $(this);
+    	switch(button.data('type')){
+    		case "upload":
+    			modal.find('.modal-title').html('upload  <strong>Crystal Report</strong> text file');
+    			$('#file-modal-submit').show();
+    			break;
+    		case "dimension":
+    			modal.find('.modal-title').html('upload  <strong>LTL Download</strong> file');
+    			$('#file-modal-dimension').show();
+    			break;
+    	}
+    });
+
+    $('#version-1-btn').on('click', function(){
+    	$('.version-1-btn-group').toggle('show');
     });
 });
 
