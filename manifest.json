@@ -3,7 +3,7 @@
 
 	"name": "Wayfair Extension",
 	"description": "A helpful extension can simplifiy wayfair order processing significantly.",
-	"version": "4.0",
+	"version": "5.1",
 	"content_scripts": 
 	[
 		{

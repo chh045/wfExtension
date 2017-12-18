@@ -325,16 +325,18 @@ $(function(){
                         });
                     }
                     updateTotalWeight(poNum);
-                    // dimension.push(poNum);
-                    page+=1;
-                    dimension[pos[poNum]] = page;
+                    dimension[pos[poNum]] = 1;
                 }
             }
-            sorted = sortObject(dimension);
-            for (e in sorted){
-                line += sorted[e]+','
+            $('#js-po-num-list').val().split(',').forEach((poNum)=>{
+                if(dimension[poNum]){
+                    page+=1;
+                    sorted[poNum] = page;
+                }
+            });
+            for(poNum in dimension){
+                line += sorted[poNum]+',';
             }
-            console.log(sorted);
             return {pagination: pagination(line.slice(0, -1), 100, 70), count: page};
         }
         function getPreWeekday(date) {
