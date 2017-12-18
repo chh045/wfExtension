@@ -75,8 +75,8 @@ $(function(){
                     sendResponse({success: true, data: totalLTL});
                 }
                 else if(type === "check-dimension"){
-                    var _dimension = checkDimension(data.pos, data.items);
-                    sendResponse({success: true, data: _dimension});
+                    var _dimension_order = checkDimension(data.pos, data.items);
+                    sendResponse({success: true, data: _dimension_order});
                 }
             }
             return true; 
@@ -299,7 +299,8 @@ $(function(){
         }
         function checkDimension(pos, items){
             var today = new Date(),
-                dimension = {}, page = 0, sorted, line = "",
+                dimension = {}, bol = {}, label={}, page = 0, label_count = 0,
+                bol_page = "", label_page = "", flatContent = ["BOL:\n"],
                 nextPickUpDate = today.getHours()>=12 ? getNextWeekday(getNextWeekday(today)) : getNextWeekday(today);
             for (poNum in pos){
                 var shippingMethod = $('.js-delivery-method-'+poNum).text();
@@ -325,19 +326,37 @@ $(function(){
                         });
                     }
                     updateTotalWeight(poNum);
-                    dimension[pos[poNum]] = 1;
+                    dimension[poNum] = Number($('#'+poNum+'_totalboxcount').text());
                 }
             }
             $('#js-po-num-list').val().split(',').forEach((poNum)=>{
                 if(dimension[poNum]){
                     page+=1;
-                    sorted[poNum] = page;
+                    bol[poNum] = page;
+                    for(var i = 0; i < dimension[poNum]; i++){
+                        label_count += 1;
+                        if(label[poNum]){
+                            label[poNum].push(label_count);
+                        } else {
+                            label[poNum] = [label_count]; 
+                        }
+                    }
                 }
             });
             for(poNum in dimension){
-                line += sorted[poNum]+',';
+                bol_page += bol[poNum]+',';
+                for(var i = 0; i < label[poNum].length; i++){
+                    label_page += label[poNum][i]+',';
+                }              
             }
-            return {pagination: pagination(line.slice(0, -1), 100, 70), count: page};
+            pagination(bol_page.slice(0, -1), 100, 70).forEach((l)=>{
+                flatContent.push(l+'\n');
+            });
+            flatContent.push('\n\nLabel:\n');
+            pagination(label_page.slice(0, -1), 100, 70).forEach((l)=>{
+                flatContent.push(l+'\n');
+            });
+            return {dimension_order: flatContent, count: page};
         }
         function getPreWeekday(date) {
             var yesterday = new Date(date.setDate(date.getDate() - 1));

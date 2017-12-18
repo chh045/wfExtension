@@ -275,12 +275,8 @@ $(document).ready(()=>{
 	            else if(response.success){
 	                var data = response.data;
 	                var text = "";
-	                data.pagination.forEach((page, p)=>{
-	                    text += "_print_"+(p+1)+" ["+page+"]\n";
-	                });
-	                $('#form-control').text(text);
-	                $('#form-control').show();
 	                showGreen('#popup-info1', data.count+" dimension checked");
+                    downloadFileFromText('ltl_dimension_order.xls', data.dimension_order);
 	            }
 	        });
         }
